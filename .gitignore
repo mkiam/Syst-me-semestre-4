@@ -1,1 +1,4 @@
 *~
+*.o
+webserver/makefile.dep
+webserver/pawnee
