@@ -1,18 +1,18 @@
 
 CC = gcc
 LD = gcc
-CFLAGS = -Wall -W - Werror
+CFLAGS = -Wall -W -Werror
 LDFLAGS =
 
 
 EXE = pawnee
 
 
-HEADERS = $ (wildcard *. h)
-CFILES = $ (wildcard *. c)
+HEADERS = $(wildcard *.h)
+CFILES = $(wildcard *.c)
 
 
-OBJS = $ (CFILES :. c =. o)
+OBJS = $(CFILES:.c=.o)
 
 
 .PHONY : all clean mrproper
@@ -21,10 +21,10 @@ OBJS = $ (CFILES :. c =. o)
 all: $(EXE)
 
 $(EXE): $(OBJS)
-	$(LD) $ ^ $(LDFLAGS) -o $@
+	    $(LD) $^  $(LDFLAGS) -o $@
 
-makefile . dep : $ (CFILES) $ (HEADERS)
-	$(CC) - MM $(CFILES) > $@
+makefile.dep: $(CFILES) $(HEADERS)
+	$(CC) -MM $(CFILES) > $@
 
 
 clean :
