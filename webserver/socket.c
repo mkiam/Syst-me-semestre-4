@@ -29,7 +29,7 @@ perror ("bind socker_serveur");
 if (listen(socket_serveur,10) == -1)
 {
 perror ("listen socket_serveur");
-/* traitement d ’ erreur */
+/* traitement d’erreur */
 }
 
 int socket_client;
@@ -37,9 +37,10 @@ socket_client = accept (socket_serveur, NULL, NULL);
 
 if (socket_client == -1)
 {
-perror ( " accept " );
-/* traitement d ’ erreur */
+perror ("accept");
+/* traitement d’erreur */
 }
+
 /* On peut maintenant dialoguer avec le client */
 
 const char * message_bienvenue = "Bonjour,bienvenue sur mon serveur \n" ;
