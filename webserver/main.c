@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <sys/types.h>          
 #include <sys/socket.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+
 
 
 int main (void/*int argc,char ** argv*/)
@@ -20,7 +24,10 @@ initialiser_signaux();
 	perror ( "accept" );
 	/* traitement d’ erreur */
       }
+pid_t pid;
     /* On peut maintenant dialoguer avec le client */
+pid=fork();
+if(pid==0){
     
     sleep(1);
     const char * message_bienvenue = " Bonjour , bienvenue sur mon serveur \n" ;
@@ -30,7 +37,11 @@ initialiser_signaux();
       write(socket_client,buf,nb);
       nb=read(socket_client,buf, 256);
     }
+exit(1);
    
-  }
+}else{
+close(socket_client);
+}
+}
   return 0;
 }
