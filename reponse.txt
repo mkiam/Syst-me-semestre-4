@@ -1,2 +1,19 @@
-q1. 
+q1.
+ 
 bind socker_serveur: Address already in use
+
+q2.
+
+Le serveur attend 1 seconde pour afficher le message de bienvenue
+
+q3.
+
+Trying ::1...
+telnet: connect to address ::1: Connection refused
+telnet: Unable to connect to remote host: Connection refused
+
+::1 est une adresse IPv6. Le serveur n'accepte que des adresses IPv4.
+
+q4. 
+
+Le serveur attend que la connexion du premier client soit terminé pour répondre au deuxième
