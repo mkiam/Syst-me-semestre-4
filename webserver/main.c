@@ -8,6 +8,8 @@
 
 int main (void/*int argc,char ** argv*/)
 {
+initialiser_signaux();
+
   int socket_serveur = creer_serveur(8000);
   char buf[256];
   int socket_client;
