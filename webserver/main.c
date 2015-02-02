@@ -42,6 +42,7 @@ exit(1);
 }else{
 close(socket_client);
 }
+initialiser_signaux();
 }
   return 0;
 }
