@@ -33,16 +33,13 @@ if(pid==0){
     sleep(1);
     const char * message_bienvenue = " Bonjour , bienvenue sur mon serveur \n" ;
 FILE* fichier1 = NULL;
-char chaine[1000] = "pawnee %s";
+//char chaine[1000] = "pawnee %s";
 fichier1=fdopen(socket_client, "w+");
 fprintf(fichier1,"pawnee %s", message_bienvenue);
-   // write ( socket_client , message_bienvenue , strlen ( message_bienvenue ));
-
-  // int nb=read(socket_client,buf, 256);
    while(fgets(buf,256,fichier1)!= NULL){
 
 fprintf(fichier1,"pawnee %s",buf);
-fgets(chaine,256,fichier1);
+//fgets(chaine,256,fichier1);
      // write(socket_client,buf,nb);
      // nb=read(socket_client,buf, 256);
     
