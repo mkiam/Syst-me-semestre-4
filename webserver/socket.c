@@ -6,6 +6,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+
+
 
 
 int creer_serveur(int port){
@@ -42,10 +47,28 @@ int creer_serveur(int port){
   return socket_serveur;
 }
 
-void initialiser_signaux(void){
-  if (signal(SIGPIPE , SIG_IGN) == SIG_ERR )
-    {
-  perror ("signal");
-    }
+void traitement_signal(int sig)
+{
+  
+  int status;
+  printf ("Signal %d reçu \n" , sig );
+  if(sig ==SIGCHLD){
+    while(waitpid(-1,&status,WNOHANG)>0)
+      ;
 
+
+  }
 }
+void initialiser_signaux ( void )
+{
+struct sigaction sa ;
+sa.sa_handler = traitement_signal ;
+sigemptyset (&sa.sa_mask );
+sa.sa_flags = SA_RESTART ;
+if (sigaction(SIGCHLD, &sa , NULL ) == -1)
+{
+perror ("sigaction(SIGCHLD)" );
+}
+}
+
+
