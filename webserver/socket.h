@@ -10,6 +10,7 @@ socket créée . */
 int creer_serveur (int);
 void initialiser_signaux(void);
 void traitement_signal(int);
-
+char *fgets_or_exit(char *, int, FILE *);
+int parse_http_request ( const char * );
 
 #endif

@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <stdlib.h>
+
 
 
 
@@ -70,5 +72,54 @@ if (sigaction(SIGCHLD, &sa , NULL ) == -1)
 perror ("sigaction(SIGCHLD)" );
 }
 }
+char *fgets_or_exit(char *buffer, int size, FILE *stream){
+  
+  char *f = fgets(buffer,size,stream);
+  if(f== NULL)
+    exit(1);
+  return f;
+ 
+}
+int parse_http_request ( const char * request_line  /*,http_request * request */){
+  int reqOk=1;
+ if(strncmp(request_line,"GET", 3)==0) {
+	char *oc1 = strchr(request_line,' '); /* oc1 pointe sur ' ' après GET */
+	if( oc1 == NULL || oc1[1] == ' ')
+	  {
+	    reqOk=0;
+	  }
+	else
+	  {
+	    char *oc2 = strchr(oc1 + 1, ' '); /* oc2 pointe sur ' ' après l'url */
+	    if (oc2 == NULL || oc2[1] == ' ') 
+	      {
+		reqOk=0;
+	      }
+	    else
+	      {
+		oc2++;
+		oc1++;
+		/* buf pointe sur GET */
+		/* oc1 pointe sur url */
+		/* oc2 pointe sur HTTP/.... */
+		if(strncmp(oc1,"/ ", 2)==0){
+		  if(strncmp(oc2,"HTTP/1.", 7)==0) {
+		    /* version majeure ok */
+
+		    if (oc2[7] != '0' && oc2[7] != '1') 
+		      reqOk=0;
+		  }
+		}else 
+		  reqOk=404;
+	      }
+	      
+	  }
+      } else 
+	reqOk=0;
+ return reqOk;
+
+}
+
+
 
 
