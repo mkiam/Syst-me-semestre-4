@@ -33,6 +33,8 @@ int main (void/*int argc,char ** argv*/)
       sleep(1);
       const char * message_bienvenue = " Bonjour , bienvenue sur mon serveur \n" ;
       const char * erreur="HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n\r\n400 Bad request\r\n";
+      const char * erreur404="HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 17\r\n\r\n404 Not Found\r\n";
+
 
       int reqOk=1;
       FILE* fichier2= NULL;
@@ -64,15 +66,21 @@ int main (void/*int argc,char ** argv*/)
 		/* buf pointe sur GET */
 		/* oc1 pointe sur url */
 		/* oc2 pointe sur HTTP/.... */
-		if(strncmp(oc2,"HTTP/1.", 7)==0) {
-		  /* version majeure ok */
-		  if (oc2[7] != '0' && oc2[7] != '1') 
-		    reqOk=0;
-		}
+		if(strncmp(oc1,"/ ", 2)==0){
+		  if(strncmp(oc2,"HTTP/1.", 7)==0) {
+		    /* version majeure ok */
+
+		    if (oc2[7] != '0' && oc2[7] != '1') 
+		      reqOk=0;
+		  }
+		}else 
+		  reqOk=404;
 	      }
+	      
 	  }
       } else 
 	reqOk=0;
+
 	
 
       
@@ -85,11 +93,10 @@ int main (void/*int argc,char ** argv*/)
 
       if(reqOk==0)
 	fprintf(fichier2,"pawnee %s", erreur);
-      else
+      else if(reqOk==404)
+	fprintf(fichier2,"pawnee %s", erreur404);
+      else     
 	fprintf(fichier2,"pawnee %s", message_bienvenue);
-
-
-     
       /* répondre au client */
       exit(1);  
     }else{
