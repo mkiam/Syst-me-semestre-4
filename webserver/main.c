@@ -13,7 +13,7 @@
 
 int main (void/*int argc,char ** argv*/)
 {
-initialiser_signaux();
+  initialiser_signaux();
 
   int socket_serveur = creer_serveur(8000);
   char buf[256];
@@ -25,29 +25,78 @@ initialiser_signaux();
 	perror ( "accept" );
 	/* traitement d’ erreur */
       }
-pid_t pid;
+    pid_t pid;
     /* On peut maintenant dialoguer avec le client */
-pid=fork();
-if(pid==0){
+    pid=fork();
+    if(pid==0){
     
-    sleep(1);
-    const char * message_bienvenue = " Bonjour , bienvenue sur mon serveur \n" ;
-FILE* fichier1 = NULL;
+      sleep(1);
+      const char * message_bienvenue = " Bonjour , bienvenue sur mon serveur \n" ;
+      const char * erreur="HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n\r\n400 Bad request\r\n";
 
-fichier1=fdopen(2, "w+");
-FILE* fichier2= NULL;
-fichier2=fdopen(socket_client, "w+");
-fprintf(fichier1,"pawnee %s", message_bienvenue);
-   while(fgets(buf,256,fichier2)!= NULL){
-fprintf(fichier1,"pawnee %s",buf);
-   
-}
- exit(1);  
-}else{
-close(socket_client);
-}
-initialiser_signaux();
-}
+      int reqOk=1;
+      FILE* fichier2= NULL;
+      fichier2=fdopen(socket_client, "w+");
+     
+      /* Récupérer la première ligne */
+      fgets(buf,256,fichier2);
+
+      /* vérifier la première ligne */
+
+
+      if(strncmp(buf,"GET", 3)==0) {
+	char *oc1 = strchr(buf,' '); /* oc1 pointe sur ' ' après GET */
+	if( oc1 == NULL || oc1[1] == ' ')
+	  {
+	    reqOk=0;
+	  }
+	else
+	  {
+	    char *oc2 = strchr(oc1 + 1, ' '); /* oc2 pointe sur ' ' après l'url */
+	    if (oc2 == NULL || oc2[1] == ' ') 
+	      {
+		reqOk=0;
+	      }
+	    else
+	      {
+		oc2++;
+		oc1++;
+		/* buf pointe sur GET */
+		/* oc1 pointe sur url */
+		/* oc2 pointe sur HTTP/.... */
+		if(strncmp(oc2,"HTTP/1.", 7)==0) {
+		  /* version majeure ok */
+		  if (oc2[7] != '0' && oc2[7] != '1') 
+		    reqOk=0;
+		}
+	      }
+	  }
+      } else 
+	reqOk=0;
+	
+
+      
+
+
+      while(fgets(buf,256,fichier2)!= NULL){
+	if (strcmp(buf,"\r\n")==0||strcmp(buf,"\n")==0)
+	  break;
+      }
+
+      if(reqOk==0)
+	fprintf(fichier2,"pawnee %s", erreur);
+      else
+	fprintf(fichier2,"pawnee %s", message_bienvenue);
+
+
+     
+      /* répondre au client */
+      exit(1);  
+    }else{
+      close(socket_client);
+    }
+    initialiser_signaux();
+  }
   return 0;
 }
 
