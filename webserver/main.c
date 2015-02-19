@@ -44,18 +44,12 @@ int main (void/*int argc,char ** argv*/)
       /* Récupérer la première ligne */
       int p = parse_http_request(fgets_or_exit(buf,256,fichier2),&hr);
 
-
-      
-
-      while(fgets_or_exit(buf,256,fichier2)){
-	if (strcmp(buf,"\r\n")==0||strcmp(buf,"\n")==0)
-	  break;
-      }
+skip_headers(fichier2);
 
       if(p==0)
-	fprintf(fichier2,"pawnee %s", erreur);
+	send_status(fichier2,400, erreur);
       else if(p==404)
-	fprintf(fichier2,"pawnee %s", erreur404);
+	send_status(fichier2,404, erreur404);
       else     
 	fprintf(fichier2,"pawnee %s", message_bienvenue);
       /* répondre au client */

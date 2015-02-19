@@ -26,5 +26,7 @@ void initialiser_signaux(void);
 void traitement_signal(int);
 char *fgets_or_exit(char *, int, FILE *);
 int parse_http_request ( const char *,http_request * );
-
+void skip_headers(FILE *);
+void send_status(FILE *, int , const char *);
+void send_response(FILE *, int , const char *, const char *);
 #endif

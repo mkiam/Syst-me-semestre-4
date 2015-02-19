@@ -116,19 +116,19 @@ int parse_http_request ( const char * request_line  ,http_request * request ){
 		/* buf pointe sur GET */
 		/* oc1 pointe sur url */
 		/* oc2 pointe sur HTTP/.... */
-
-		request->url = oc1;
-
-		if(strncmp(oc1,"/ ", 2) == 0){
+		if(oc1[0]=='/'){
+		  request->url=malloc(oc2-oc1);
+		  strncpy(request->url,oc1,oc2-oc1-1);
+		  request->url[(oc2-oc1)-1] = '\0';
 		  if(strncmp(oc2,"HTTP/1.", 7 )== 0) {
 		    request->major_version = 1;
-
+		    
 		    /* version majeure ok */
-
+		    
 		    if (oc2[7] != '0' && oc2[7] != '1') 
 		      reqOk=0;
 		    else
-		      request->minor_version = oc2[7];
+		      request->minor_version = oc2[7]-'0';
 		  }
 		}else 
 		  reqOk = 404;
@@ -144,34 +144,24 @@ int parse_http_request ( const char * request_line  ,http_request * request ){
 
 
 }
-/*
-void skip_headers(FILE *client){
-  int c1=0;
-  char c2="\r\n";
-  char c3="\n";
-  while(c1!=(int)c2&&c1!=(int)c3)
-    c1=fgetc(client);
-  fp = fopen (client,"w+");
-   fprintf(fp,"pawnee %s",  );
 
+void skip_headers(FILE *client){
+  char buf[256];
+  while(fgets_or_exit(buf,256,client)){
+    if (strcmp(buf,"\r\n")==0||strcmp(buf,"\n")==0)
+      break;
+  }
 }
 
 void send_status(FILE *client , int code , const char *reason_phrase){
-  FILE* fichier2= NULL;
-  char buf[256]
-    fichier2 = fdopen(client, "w+");
-     
-  Récupérer la première ligne 
- parse_http_request(fgets_or_exit(buf,256,fichier2));
-  fprintf(fichier2,"SP %s",code,"SP %s",reason_phrase);
+   fprintf(client,"HTTP/1.1 %d %s\r\n",code,reason_phrase);
+}
+
+void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
+  send_status(client, code, reason_phrase);
+  fprintf(client,"pawnee %s",message_body);
 
 }
-void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
-  fichier2 = fdopen(client, "w+");
-  send_status(client, code, reason_phrase,reason_phrase);
-  fprintf(fichier2,"pawnee %s",message_body);
-
-}*/
 
 
 
