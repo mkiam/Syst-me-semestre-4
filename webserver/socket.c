@@ -12,7 +12,18 @@
 #include <stdlib.h>
 
 
+enum http_method {
+HTTP_GET ,
+HTTP_UNSUPPORTED ,
+};
 
+typedef struct
+{
+enum http_method method;
+int major_version;
+int minor_version;
+char *url;
+} http_request;
 
 
 int creer_serveur(int port){
@@ -80,9 +91,12 @@ char *fgets_or_exit(char *buffer, int size, FILE *stream){
   return f;
  
 }
-int parse_http_request ( const char * request_line  /*,http_request * request */){
+int parse_http_request ( const char * request_line  ,http_request * request ){
   int reqOk=1;
+
  if(strncmp(request_line,"GET", 3)==0) {
+
+   request->method = HTTP_GET;
 	char *oc1 = strchr(request_line,' '); /* oc1 pointe sur ' ' après GET */
 	if( oc1 == NULL || oc1[1] == ' ')
 	  {
@@ -102,23 +116,35 @@ int parse_http_request ( const char * request_line  /*,http_request * request */
 		/* buf pointe sur GET */
 		/* oc1 pointe sur url */
 		/* oc2 pointe sur HTTP/.... */
-		if(strncmp(oc1,"/ ", 2)==0){
-		  if(strncmp(oc2,"HTTP/1.", 7)==0) {
+
+		request->url = oc1;
+
+		if(strncmp(oc1,"/ ", 2) == 0){
+		  if(strncmp(oc2,"HTTP/1.", 7 )== 0) {
+		    request->major_version = 1;
+
 		    /* version majeure ok */
 
 		    if (oc2[7] != '0' && oc2[7] != '1') 
 		      reqOk=0;
+		    else
+		      request->minor_version = oc2[7];
 		  }
 		}else 
-		  reqOk=404;
+		  reqOk = 404;
 	      }
 	      
 	  }
-      } else 
+ } else{ 
 	reqOk=0;
+	request->method= HTTP_UNSUPPORTED;
+ }
+
  return reqOk;
 
+
 }
+/*
 void skip_headers(FILE *client){
   int c1=0;
   char c2="\r\n";
@@ -131,21 +157,21 @@ void skip_headers(FILE *client){
 }
 
 void send_status(FILE *client , int code , const char *reason_phrase){
- FILE* fichier2= NULL;
-char buf[256]
-      fichier2=fdopen(client, "w+");
+  FILE* fichier2= NULL;
+  char buf[256]
+    fichier2 = fdopen(client, "w+");
      
-      /* Récupérer la première ligne */
-       parse_http_request(fgets_or_exit(buf,256,fichier2));
-       fprintf(fichier2,"SP %s",code,"SP %s",reason,_phrase);
+  Récupérer la première ligne 
+ parse_http_request(fgets_or_exit(buf,256,fichier2));
+  fprintf(fichier2,"SP %s",code,"SP %s",reason_phrase);
 
 }
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
-  fichier2=fdopen(client, "w+");
+  fichier2 = fdopen(client, "w+");
   send_status(client, code, reason_phrase,reason_phrase);
   fprintf(fichier2,"pawnee %s",message_body);
 
-}
+}*/
 
 
 

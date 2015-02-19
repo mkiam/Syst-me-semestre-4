@@ -37,10 +37,12 @@ int main (void/*int argc,char ** argv*/)
 
 
       FILE* fichier2= NULL;
+      http_request hr;
+      
       fichier2=fdopen(socket_client, "w+");
-     
+
       /* Récupérer la première ligne */
-      int p = parse_http_request(fgets_or_exit(buf,256,fichier2));
+      int p = parse_http_request(fgets_or_exit(buf,256,fichier2),&hr);
 
 
       
