@@ -32,6 +32,7 @@ int main (void/*int argc,char ** argv*/)
     
       sleep(1);
       const char * message_bienvenue = " Bonjour , bienvenue sur mon serveur \n" ;
+ const char * mot; 
       const char * erreur="HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 17\r\n\r\n400 Bad request\r\n";
       const char * erreur404="HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 17\r\n\r\n404 Not Found\r\n";
 
@@ -46,12 +47,18 @@ int main (void/*int argc,char ** argv*/)
 
 skip_headers(fichier2);
 
-      if(p==0)
-	send_status(fichier2,400, erreur);
-      else if(p==404)
-	send_status(fichier2,404, erreur404);
-      else     
-	fprintf(fichier2,"pawnee %s", message_bienvenue);
+      if(p==0){
+mot="Bad Request";
+	send_response(fichier2,400,mot,erreur);
+}
+      else if(p==404){
+mot="Method Not Allow";
+	send_response(fichier2,404,mot,erreur404);
+}
+      else  {  
+mot="Ok"; 
+	send_response(fichier2,200,mot,message_bienvenue);
+}
       /* répondre au client */
       exit(1);  
     }else{
