@@ -10,6 +10,9 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 
 enum http_method {
@@ -162,6 +165,57 @@ void send_response(FILE *client, int code, const char *reason_phrase, const char
   fprintf(client,"pawnee %s",message_body);
 
 }
+
+
+char *rewrite_url(char *url){
+  int i;
+  char *newUrl;
+  int taille = strlen(url);
+  for(i=0;i<taille;++i){
+    if(url[i] =='?')
+      break;
+   
+    newUrl += url[i];
+    }
+  return newUrl;
+}
+
+int check_and_open(const char *url, const char *document_root){
+  struct stat buf;
+  const char* mot="Method Not Allow";
+  const char * erreur404="HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 17\r\n\r\n404 Not Found\r\n";
+
+  int fd;
+  if(stat(document_root,&buf)==-1){
+    perror(document_root);
+    return -1;
+  }else{
+    if(S_ISREG(buf.st_mode)){
+    
+      fd = open(rewrite_url((char *)url), O_RDONLY);
+      if (fd == -1)
+	{
+	  perror("open");
+	  return -1;
+	}else{
+	send_response(fdopen(fd,"w+"),404,mot,erreur404);
+	return fd;
+      }
+
+    }
+    return -1;
+
+  }
+}
+/*
+int get_file_size(int fd){
+}
+int copy(int, int){
+}
+
+
+
+*/
 
 
 
