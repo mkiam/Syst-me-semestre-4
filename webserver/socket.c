@@ -134,7 +134,7 @@ int parse_http_request ( const char * request_line  ,http_request * request ){
 		      request->minor_version = oc2[7]-'0';
 		  }
 		}else 
-		  reqOk = 404;
+		  reqOk = 1;
 	      }
 	      
 	  }
@@ -162,50 +162,52 @@ void send_status(FILE *client , int code , const char *reason_phrase){
 
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
   send_status(client, code, reason_phrase);
-  fprintf(client,"pawnee %s",message_body);
+  fprintf(client, "Content-Length: %d\r\n", (int) strlen(message_body));
+  fprintf(client, "\r\n");
+  fprintf(client,"%s",message_body);
 
 }
 
 
 char *rewrite_url(char *url){
   int i;
-  char *newUrl;
   int taille = strlen(url);
   for(i=0;i<taille;++i){
     if(url[i] =='?')
-      break;
-   
-    newUrl += url[i];
-    }
-  return newUrl;
+      {
+	url[i] = '\0';
+	return url;
+      }
+  
+}
+return url;
 }
 
 int check_and_open(const char *url, const char *document_root){
   struct stat buf;
-  const char* mot="Method Not Allow";
-  const char * erreur404="HTTP/1.1 404 Not Found\r\nConnection: close\r\nContent-Length: 17\r\n\r\n404 Not Found\r\n";
-
   int fd;
+  char *tmp;
+  tmp=malloc(strlen(url)+strlen(document_root)+1);
+  tmp=strcat((char *)url,(char *)document_root);
+
+
   if(stat(document_root,&buf)==-1){
     perror(document_root);
     return -1;
-  }else{
+  }
     if(S_ISREG(buf.st_mode)){
     
-      fd = open(rewrite_url((char *)url), O_RDONLY);
-      if (fd == -1)
-	{
+      fd = open(tmp, O_RDONLY);
+      if (fd == -1){
+
 	  perror("open");
 	  return -1;
-	}else{
-	send_response(fdopen(fd,"w+"),404,mot,erreur404);
+	}
+	else
 	return fd;
-      }
-
     }
-    return -1;
-
-  }
+  return -1;
+  
 }
 /*
 int get_file_size(int fd){
