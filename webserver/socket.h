@@ -31,4 +31,6 @@ void send_status(FILE *, int , const char *);
 void send_response(FILE *, int , const char *, const char *);
 char *rewrite_url(char *);
 int check_and_open(const char *, const char *);
+int get_file_size(int);
+int copy(int,int);
 #endif

@@ -209,15 +209,39 @@ int check_and_open(const char *url, const char *document_root){
   return -1;
   
 }
-/*
+
 int get_file_size(int fd){
+  struct stat buf;
+
+  if(fstat(fd, &buf) == -1){
+    perror("fichier");
+    return -1;
+  }
+
+  return buf.st_size;
+
 }
-int copy(int, int){
+
+int copy(int in, int out){
+  int val;
+  int t;
+  t=read(in, &val, sizeof(val));
+
+  if(t==-1){
+    perror("read");
+    return -1;
+  }
+
+  if(write(out, &val, t) == -1){
+    perror("write");
+    return -1;
+  }
+  return out;
 }
 
 
 
-*/
+
 
 
 
