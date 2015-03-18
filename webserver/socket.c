@@ -16,16 +16,16 @@
 
 
 enum http_method {
-HTTP_GET ,
-HTTP_UNSUPPORTED ,
+  HTTP_GET ,
+  HTTP_UNSUPPORTED ,
 };
 
 typedef struct
 {
-enum http_method method;
-int major_version;
-int minor_version;
-char *url;
+  enum http_method method;
+  int major_version;
+  int minor_version;
+  char *url;
 } http_request;
 
 
@@ -77,14 +77,14 @@ void traitement_signal(int sig)
 }
 void initialiser_signaux ( void )
 {
-struct sigaction sa ;
-sa.sa_handler = traitement_signal ;
-sigemptyset (&sa.sa_mask );
-sa.sa_flags = SA_RESTART ;
-if (sigaction(SIGCHLD, &sa , NULL ) == -1)
-{
-perror ("sigaction(SIGCHLD)" );
-}
+  struct sigaction sa ;
+  sa.sa_handler = traitement_signal ;
+  sigemptyset (&sa.sa_mask );
+  sa.sa_flags = SA_RESTART ;
+  if (sigaction(SIGCHLD, &sa , NULL ) == -1)
+    {
+      perror ("sigaction(SIGCHLD)" );
+    }
 }
 char *fgets_or_exit(char *buffer, int size, FILE *stream){
   
@@ -97,53 +97,53 @@ char *fgets_or_exit(char *buffer, int size, FILE *stream){
 int parse_http_request ( const char * request_line  ,http_request * request ){
   int reqOk=1;
 
- if(strncmp(request_line,"GET", 3)==0) {
+  if(strncmp(request_line,"GET", 3)==0) {
 
-   request->method = HTTP_GET;
-	char *oc1 = strchr(request_line,' '); /* oc1 pointe sur ' ' après GET */
-	if( oc1 == NULL || oc1[1] == ' ')
+    request->method = HTTP_GET;
+    char *oc1 = strchr(request_line,' '); /* oc1 pointe sur ' ' après GET */
+    if( oc1 == NULL || oc1[1] == ' ')
+      {
+	reqOk=0;
+      }
+    else
+      {
+	char *oc2 = strchr(oc1 + 1, ' '); /* oc2 pointe sur ' ' après l'url */
+	if (oc2 == NULL || oc2[1] == ' ') 
 	  {
 	    reqOk=0;
 	  }
 	else
 	  {
-	    char *oc2 = strchr(oc1 + 1, ' '); /* oc2 pointe sur ' ' après l'url */
-	    if (oc2 == NULL || oc2[1] == ' ') 
-	      {
-		reqOk=0;
-	      }
-	    else
-	      {
-		oc2++;
-		oc1++;
-		/* buf pointe sur GET */
-		/* oc1 pointe sur url */
-		/* oc2 pointe sur HTTP/.... */
-		if(oc1[0]=='/'){
-		  request->url=malloc(oc2-oc1);
-		  strncpy(request->url,oc1,oc2-oc1-1);
-		  request->url[(oc2-oc1)-1] = '\0';
-		  if(strncmp(oc2,"HTTP/1.", 7 )== 0) {
-		    request->major_version = 1;
+	    oc2++;
+	    oc1++;
+	    /* buf pointe sur GET */
+	    /* oc1 pointe sur url */
+	    /* oc2 pointe sur HTTP/.... */
+	    if(oc1[0]=='/'){
+	      request->url=malloc(oc2-oc1);
+	      strncpy(request->url,oc1,oc2-oc1-1);
+	      request->url[(oc2-oc1)-1] = '\0';
+	      if(strncmp(oc2,"HTTP/1.", 7 )== 0) {
+		request->major_version = 1;
 		    
-		    /* version majeure ok */
+		/* version majeure ok */
 		    
-		    if (oc2[7] != '0' && oc2[7] != '1') 
-		      reqOk=0;
-		    else
-		      request->minor_version = oc2[7]-'0';
-		  }
-		}else 
-		  reqOk = 1;
+		if (oc2[7] != '0' && oc2[7] != '1') 
+		  reqOk=0;
+		else
+		  request->minor_version = oc2[7]-'0';
 	      }
-	      
+	    }else 
+	      reqOk = 1;
 	  }
- } else{ 
-	reqOk=0;
-	request->method= HTTP_UNSUPPORTED;
- }
+	      
+      }
+  } else{ 
+    reqOk=0;
+    request->method= HTTP_UNSUPPORTED;
+  }
 
- return reqOk;
+  return reqOk;
 
 
 }
@@ -157,7 +157,7 @@ void skip_headers(FILE *client){
 }
 
 void send_status(FILE *client , int code , const char *reason_phrase){
-   fprintf(client,"HTTP/1.1 %d %s\r\n",code,reason_phrase);
+  fprintf(client,"HTTP/1.1 %d %s\r\n",code,reason_phrase);
 }
 
 void send_response(FILE *client, int code, const char *reason_phrase, const char *message_body){
@@ -165,13 +165,17 @@ void send_response(FILE *client, int code, const char *reason_phrase, const char
   fprintf(client, "Content-Length: %d\r\n", (int) strlen(message_body));
   fprintf(client, "\r\n");
   fprintf(client,"%s",message_body);
-
+  fflush(client);
 }
 
 
 char *rewrite_url(char *url){
   int i;
   int taille = strlen(url);
+ 
+  if(url[taille-1]== '/')
+    strcat(url,"index.html"); 
+
   for(i=0;i<taille;++i){
     if(url[i] =='?')
       {
@@ -179,36 +183,38 @@ char *rewrite_url(char *url){
 	return url;
       }
   
-}
-return url;
+  }
+  return url;
 }
 
 int check_and_open(const char *url, const char *document_root){
   struct stat buf;
   int fd;
   char *tmp;
-  tmp=malloc(strlen(url)+strlen(document_root)+1);
-  tmp=strcat((char *)url,(char *)document_root);
-
-
-  if(stat(document_root,&buf)==-1){
-    perror(document_root);
+  if(strstr(url, "..")){
+    errno = EACCES;
     return -1;
   }
-    if(S_ISREG(buf.st_mode)){
-    
-      fd = open(tmp, O_RDONLY);
-      if (fd == -1){
+  tmp=malloc(strlen(url)+strlen(document_root)+1);
+  strcpy(tmp, document_root);
+  strcat(tmp, url);
+  printf("chemin: %s\n", tmp);
 
-	  perror("open");
-	  return -1;
-	}
-	else
-	return fd;
+  if(stat(tmp,&buf)==-1){
+    perror(tmp);
+    return -1;
+  }
+  if(S_ISREG(buf.st_mode)){
+    fd = open(tmp, O_RDONLY);
+    if (fd == -1){
+      
+      perror("open");
+      return -1;
     }
-    errno = EEXIST;
+    return fd;
+  }
+  errno = EACCES;
   return -1;
-  
 }
 
 int get_file_size(int fd){
@@ -228,18 +234,18 @@ int copy(int in, int out){
   int t;
  
   while((t = read(in, &val, sizeof(val))) != 0){
- if(t == -1){
-    perror("read");
-    return -1;
-  }
+    if(t == -1){
+      perror("read");
+      return -1;
+    }
 
-   if(write(out, &val, t) == -1){
-    perror("write");
-    return -1;
-  }
+    if(write(out, &val, t) == -1){
+      perror("write");
+      return -1;
+    }
  
- }
- return out;
+  }
+  return out;
 }
 
 
