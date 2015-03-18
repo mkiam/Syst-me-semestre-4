@@ -206,6 +206,7 @@ int check_and_open(const char *url, const char *document_root){
 	else
 	return fd;
     }
+    errno = EEXIST;
   return -1;
   
 }
@@ -225,18 +226,20 @@ int get_file_size(int fd){
 int copy(int in, int out){
   int val;
   int t;
-  t=read(in, &val, sizeof(val));
-
-  if(t==-1){
+ 
+  while((t = read(in, &val, sizeof(val))) != 0){
+ if(t == -1){
     perror("read");
     return -1;
   }
 
-  if(write(out, &val, t) == -1){
+   if(write(out, &val, t) == -1){
     perror("write");
     return -1;
   }
-  return out;
+ 
+ }
+ return out;
 }
 
 
